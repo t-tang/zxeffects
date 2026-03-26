@@ -1,0 +1,2 @@
+Load "Charset.bin" CODE $EF20
+POKE UINTEGER 23606,$EF20 - 256
