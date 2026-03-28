@@ -1,5 +1,3 @@
-FUNCTION FASTCALL CharBitsAddress(chCode as UBYTE) AS UINTEGER
-ASM
 ;-------------------------------------
 ; in  : A  = character code
 ; out : HL = address of character bitmap
@@ -14,5 +12,4 @@ CharBitsAddress:
     ADD HL,HL       ; mult8
     LD DE,(23606)   ; Sytem variable Chars
     ADD HL,DE       ; hl -> Character data.
-END ASM
-END FUNCTION
+    RET

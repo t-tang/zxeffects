@@ -1,15 +1,5 @@
-FUNCTION FASTCALL CharCellAddress(y as uByte, x as uByte) AS UINTEGER
-' takes an ascii code value for a character.
-' By Britlion, 2012.
-ASM
-;--------------------------------------
-; ZX Basic entry point
-;--------------------------------------
-                 ; A = y cell coord
-POP DE           ; ZX Basic return address
-POP BC           ;
-LD C,B           ; C = x cell coord
-PUSH DE          ; restore return address
+; takes an ascii code value for a character.
+; By Britlion, 2012.
 
 ;--------------------------------------
 ; in  : A  - y cell coord
@@ -20,7 +10,6 @@ PUSH DE          ; restore return address
 ;--------------------------------------
 
 CharCellAddress:
-;' A=y value
 LD E,A
 AND 24           ; calculate
 OR 64            ; screen
@@ -37,5 +26,4 @@ LD E,A
 LD A,C     ;' X Value
 ADD A,E         ;' correct address for column value. (add it in)
 LD L,A
-END ASM
-END FUNCTION
+RET

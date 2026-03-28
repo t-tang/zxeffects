@@ -1,178 +1,56 @@
+Sub Fastcall LoadAYChannelAsmCode()
+Asm
+    ret
+    #include"asm/AYChannels/TryDecayChannel.asm"
+    #include"asm/AYChannels/ReadAYRegister.asm"
+    #include"asm/AYChannels/DisplayChannel.asm"
+    #include"asm/AYChannels/ChannelData.asm"
+    #include"asm/AYChannels/RenderAYChannel.asm"
+End Asm
+End Sub
+
+LoadAYChannelAsmCode()
+
+/' Not used
 SUB FASTCALL TryDecayChannel(channel as ubyte)
 ASM
-PROC
-;----------------------------------
-; in : ix = channel ptr
-;----------------------------------
-tryDecayChannel:
-
-    ld b,(ix+0)             ; b = cvalue
-    xor a
-    cp b                    ; is there anything to decay?
-    ret z                   ; already 0, nothing to decay
-
-    ld a,(ix+1)             ; a  = yoff
-    sub b                   ; a  = yoff - cvalue
-    call PixelRowTablePtr ; hl = initial screen table ptr
-
-; decode the screen table ptr
-    ld e,(hl)               ; decode screen table ptr
-    inc hl
-    ld d,(hl)               ; de = screen address
-    dec hl                  ; reset hl
-
-; add the x offset
-    ld a,(ix+2)
-    add a,e
-    ld e,a
-    jr nc, setByte
-    inc d
-
-setByte:
-LOCAL setByte:
-    xor a
-    ld (de),a               ; set the screen pixel
-
-; decay the cvalue
-    dec b
-    ld (ix+0),b
-
-ENDP
+    JP tryDecayChannel
 END ASM
 END SUB
 
 SUB FASTCALL DisplayChannel(channel as ubyte, newValue as ubyte)
 ASM
-PROC
-
     ; a = channel number
     ld c,(ix+7)             ; c = new value
-displayChannel:
-
-    push ix                 ; save ix for basic
-
-    call calcChanPtr        ; hl = channel ptr
-    push hl                 ; point ix to the channel data
-    pop ix                  ; ix = channel ptr
-
-    ld b,(ix+0)             ; b = cvalue
-    ld a,(ix+1)             ; a  = yoff
-    sub b                   ; a  = yoff - cvalue
-    call PixelRowTablePtr   ; hl = initial screen table ptr
-
-; main loop to set the screen pixels
-nextRow:
-LOCAL nextRow:
-
-; decode the screen table ptr
-    ld e,(hl)               ; decode screen table ptr
-    inc hl
-    ld d,(hl)               ; de = screen address
-    dec hl                  ; reset hl
-
-; add the x offset
-    ld a,(ix+2)
-    add a,e
-    ld e,a
-    jr nc, setByte
-    inc d
-
-setByte:
-LOCAL setByte:
-    ld a,$7e                ; single border pixel either side
-    ld (de),a               ; set the screen pixel
-
-    dec hl
-    dec hl                  ; point to next table entry
-
-; check for more rows to be rendered
-    inc b
-    ld a,c
-    cp b
-    jr nc,nextRow
-
-; set the new value
-    ld (ix+0),c
-
-endproc:
-LOCAL endproc:
-    pop ix                  ; restore ix
-ENDP
+    jp displayChannel
 END ASM
 END SUB
+'/
 
-Function fastcall ChannelData(channel as ubyte) as UINTEGER
+Function Fastcall ChannelData(channel as ubyte) as UINTEGER
 ASM
-PROC
-;----------------------------------------
-; in  : a = channel number
-; out : hl = channel ptr
-; keep: bc,de
-;----------------------------------------
-calcChanPtr:
-    ld l,a
-    sla a
-    sla a      ; mult3 to get offset
-
-    ld hl,channels
-    add a,l
-    ld l,a
-    ret nc
-    inc h
-
-    ret
-;----------------------------------------
-; 0 = cvalue
-; 1 = yoff
-; 2 = xoff 
-; 3 = ay register
-;----------------------------------------
-channels:
-LOCAL channels:
-    db $00, 191, 15, $00
-    db $00, 191, 16, $01
-    db $00, 191, 17, $02
-
-ENDP
+    jp calcChanPtr
 END ASM
 END FUNCTION
 
-SUB FASTCALL RenderChannelAsm(channel as ubyte)
+SUB FASTCALL RenderAYChannel(channel as ubyte)
 ASM
-PROC
-    ; a = channel number
-    ld e,a                  ; save the channel number
-    push ix
-
-    call calcChanPtr        ; hl = channel ptr
-    push hl                 ; point ix to the channel data
-    pop ix                  ; ix = channel ptr
-
-    ld a,(ix+3)             ; a = AY register
-    call readAyRegister     ; a = regster value
-    srl a
-    srl a
-    srl a
-    ld b,(ix+0)             ; b = cvalue
-    cp b                    ; test newvalue > cvalue
-    jr z,doDecay
-    jr c,doDecay            ; cvalue > newvalue
-
-    ld c,a                  ; c = new value
-    ld a,e                  ; recover channel number
-    call displayChannel     ;
-    jr endproc              ; exit with new register, accepted
-
-doDecay:
-    call tryDecayChannel
-    call tryDecayChannel
-
-endproc:
-LOCAL endproc:
-    pop ix
-ENDP
+    jp RenderAYChannel
 END ASM
 End Sub
+
+CONST ChanAFinePitch   AS UBYTE = $00
+CONST ChanACoarsePitch AS UBYTE = $01
+CONST ChanBFinePitch   AS UBYTE = $02
+CONST ChanBCoarsePitch AS UBYTE = $03
+CONST ChanCFinePitch   AS UBYTE = $04
+CONST ChanCCoarsePitch AS UBYTE = $05
+
+CONST Mixer AS UBYTE = $07
+
+CONST ChanAVol AS UBYTE = $08
+CONST ChanBVol AS UBYTE = $09
+CONST ChanCVol AS UBYTE = $0A
 
 Sub InitChannel(channel as ubyte, yoff as ubyte, xoff as ubyte, ayReg as ubyte)
     dim channelPtr as UINTEGER = ChannelData(channel)
@@ -199,9 +77,9 @@ Sub ChannelTest()
     InitChannelTest()
     while 1
         RenderMusic()
-        RenderChannelAsm(0)
-        RenderChannelAsm(1)
-        RenderChannelAsm(2)
+        RenderAYChannel(0)
+        RenderAYChannel(1)
+        RenderAYChannel(2)
         pause 1
     end while
 End Sub

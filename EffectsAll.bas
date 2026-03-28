@@ -1,10 +1,7 @@
 #include<print42.bas>
 #include"sys/Defines.bas"
-#include"sys/AyChip.bas"
 #include"sys/PixelRows.bas"
 #include"sys/Charset.bas"
-#include"sys/CharBitsAddress.bas"
-#include"sys/CharCellAddress.bas"
 #include"sys/DoubleSizePrint.bas"
 #include"sys/DSizeHalfChar.bas"
 #include"sys/DrawBox.bas"
@@ -79,9 +76,9 @@ FOR i = 0 to 65535
     RenderCounterFrame()
     'RenderManicTune()
     RenderMusic()
-    RenderChannelAsm(0)
-    RenderChannelAsm(1)
-    RenderChannelAsm(2)
+    RenderAYChannel(0)
+    RenderAYChannel(1)
+    RenderAYChannel(2)
 next
 
 RemoveColoriseAreas()

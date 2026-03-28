@@ -1,10 +1,14 @@
+#ifndef __PIXEL_ROWS__
+#define __PIXEL_ROWS__
+
 #define D_PIXELROW_TABLE_ADDR $F220
 Const PixelRowTableAddr AS UINTEGER = D_PIXELROW_TABLE_ADDR
 Print "Loading Pixel Row Table"
 Load "PixelRowTable.bin" CODE PixelRowTableAddr
 
-Function FASTCALL PixelRowTablePtr(y as UBYTE) AS UINTEGER
+Sub FastCall LoadPixelRowAsmCode()
 ASM
+ret
 ;----------------------------------------
 ; in : a = y (0-191)
 ; out: hl = pointer into pixel row table
@@ -17,4 +21,7 @@ PixelRowTablePtr
     add hl,de
     ret
 END ASM
-END FUNCTION
+END Sub
+
+LoadPixelRowAsmCode()
+#endif
