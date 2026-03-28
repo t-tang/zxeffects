@@ -40,5 +40,9 @@ ASM
     CALL PLY_AKG_PLAY
 END ASM
 END SUB
+
+#else
+Sub RenderMusic()
+End Sub
 #endif
 

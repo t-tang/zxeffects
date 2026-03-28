@@ -60,7 +60,19 @@ InitManicText()
 InitChannelTest()
 
 FOR i = 0 to 65535
+#ifdef TIMING
+    Asm
+        xor a
+        out($fe),a
+    End Asm
+#endif
     PAUSE 1
+#ifdef TIMING
+    Asm
+    ld a,$07
+    out($fe),a
+    End Asm
+#endif
     RenderColoriseAreaFrame()
     RenderColoriseBorderFrame()
     RenderManicTextFrame()
